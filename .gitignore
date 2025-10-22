@@ -213,5 +213,6 @@ __marimo__/
 *.ico
 main.build/
 main.dist/
+main.onefile-build/
 favicon.ico
 build_nuitka.py
