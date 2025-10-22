@@ -1,2 +1,0 @@
-"""kqi-maakmaay package root."""
-
