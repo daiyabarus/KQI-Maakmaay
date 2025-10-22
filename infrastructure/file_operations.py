@@ -1,6 +1,3 @@
-"""
-Concrete implementations of repository interfaces
-"""
 import gzip
 import os
 import shutil
@@ -51,8 +48,6 @@ class FileRepository(IFileRepository):
 
 class DataRepository(IDataRepository):
     """Concrete implementation of data operations"""
-    
-    # Column mapping untuk KQI raw (NO HEADER)
     COLUMN_MAPPING = {
         0: 'timecolumn',
         1: 'batchno',
@@ -83,14 +78,11 @@ class DataRepository(IDataRepository):
         """Load dan gabungkan multiple CSV files - NO HEADER"""
         dfs = []
         for csv_file in csv_files:
-            # Load WITHOUT header (header=None)
             df = pd.read_csv(csv_file, delimiter=delimiter, header=None)
             df['source_file'] = Path(csv_file).name
             dfs.append(df)
         
         combined_df = pd.concat(dfs, ignore_index=True)
-        
-        # Rename kolom berdasarkan posisi
         col_map = {i: name for i, name in self.COLUMN_MAPPING.items() if i < len(combined_df.columns)}
         combined_df = combined_df.rename(columns=col_map)
         
@@ -98,7 +90,6 @@ class DataRepository(IDataRepository):
 
     def load_mapping_file(self, mapping_file: str) -> pd.DataFrame:
         """Load mapping file - WITH HEADER, COMMA-separated"""
-        # Load WITH header (header=0), explicitly use COMMA separator
         df = pd.read_csv(
             mapping_file, 
             sep=',', 
@@ -107,14 +98,9 @@ class DataRepository(IDataRepository):
             encoding='utf-8',
             skipinitialspace=True
         )
-        
-        # Clean column names (remove any whitespace)
+
         df.columns = df.columns.str.strip()
-        
-        # Required columns only
         required_cols = ['TOWER ID', 'SWE_L5', 'eNodeBId']
-        
-        # Check if all required columns exist
         missing_cols = [col for col in required_cols if col not in df.columns]
         if missing_cols:
             available_cols = list(df.columns)
@@ -124,18 +110,12 @@ class DataRepository(IDataRepository):
                 f"Please ensure file is COMMA-separated with header: TOWER ID, SWE_L5, eNodeBId"
             )
         
-        # Select and rename only needed columns
         df = df[required_cols].copy()
         df.columns = ['tower_id', 'swe_l5', 'enodeb_id']
-        
-        # Remove whitespace from ALL string columns
         df['tower_id'] = df['tower_id'].astype(str).str.strip()
         df['swe_l5'] = df['swe_l5'].astype(str).str.strip()
-        
-        # Convert eNodeBId to numeric and drop invalid
         df['enodeb_id'] = pd.to_numeric(df['enodeb_id'], errors='coerce')
         
-        # Drop rows with invalid eNodeBId
         initial_count = len(df)
         df = df.dropna(subset=['enodeb_id'])
         dropped_count = initial_count - len(df)
@@ -157,22 +137,11 @@ class KQIProcessor(IKQIProcessor):
     
     def process(self, kqiraw: pd.DataFrame, sourceraw: pd.DataFrame) -> dict:
         """Main processing pipeline"""
-        # Kolom sudah di-rename di DataRepository
-        
-        # Step 5: Process konversi Network ID
         kqiraw = self._convert_network_id(kqiraw)
-        
-        # Step 7: Convert kolom waktu
         kqiraw = self._convert_time_column(kqiraw)
-        
-        # Step 8: Mapping dengan sourceraw
         kqiraw = self._map_tower_data(kqiraw, sourceraw)
-        
-        # Pisahkan data mapped dan unmapped
         mapped_data = kqiraw[kqiraw['tower_id'].notna()].copy()
         unmapped_data = kqiraw[kqiraw['tower_id'].isna()].copy()
-        
-        # Step 9: Kalkulasi & Agregasi
         result_mapped = self._aggregate_daily(mapped_data)
         result_unmapped = self._aggregate_unmapped(unmapped_data)
         

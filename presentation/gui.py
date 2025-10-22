@@ -79,7 +79,7 @@ class ModernKQIGUI:
         
         self._create_folder_input(
             input_section,
-            "Mapping File (with header):",
+            "Mapping File (CSV):",
             self.mapping_file,
             self.browse_mapping_file,
             1
@@ -87,7 +87,7 @@ class ModernKQIGUI:
         
         self._create_folder_input(
             input_section,
-            "Output Folder:",
+            "Output Path:",
             self.output_folder,
             self.browse_output_folder,
             2

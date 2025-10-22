@@ -211,3 +211,7 @@ __marimo__/
 *.exe
 *csv.gz
 *.ico
+main.build/
+main.dist/
+favicon.ico
+build_nuitka.py

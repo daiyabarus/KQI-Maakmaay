@@ -86,9 +86,9 @@ class ProcessKQIDataUseCase:
             # Step 5-9: Process data
             self.update_progress(5, total_steps, "Processing data...")
             self.log("\n[Step 5-9/9] Processing data...")
-            self.log("  → Using SUM-based aggregation")
-            self.log("  → E2E Delay = SUM(tcp_rtt) / SUM(tcp_rtt_good_count)")
-            self.log("  → Loss Rates = SUM(lost_packets) / SUM(total_packets) * 100")
+            self.log("  → AGG")
+            self.log("  → SUM")
+            self.log("  → SAVING OUTPUTS")
             
             results = self.processor.process(kqiraw, sourceraw)
             
@@ -103,7 +103,7 @@ class ProcessKQIDataUseCase:
             self.log("\n[Final] Saving outputs...")
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-            mapped_file = f"{output_folder}/kqi_mapped_{timestamp}.csv"
+            mapped_file = f"{output_folder}/KQI_{timestamp}.csv"
             unmapped_file = f"{output_folder}/kqi_unmapped_{timestamp}.csv"
 
             if not result_mapped.empty:
