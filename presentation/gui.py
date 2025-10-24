@@ -25,7 +25,7 @@ class ModernKQIGUI:
             image = Image.open(io.BytesIO(image_data))
             icon_image = ImageTk.PhotoImage(image)
             self.root.iconphoto(False, icon_image)
-            self._icon_ref = icon_image  # keep reference
+            self._icon_ref = icon_image
         except Exception as e:
             print(f"Icon load failed: {e}")
         
